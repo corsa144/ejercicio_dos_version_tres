@@ -1,8 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { BienvenidaComponent } from '../bienvenida/bienvenida.component';
-import { RouterLink, RouterModule, RouterOutlet } from '@angular/router';
-import { Router } from 'express';
-
+import { Router, RouterLink, RouterModule, RouterOutlet } from '@angular/router';
+import { DOCUMENT } from '@angular/common';
 
 interface User {
   userName: string;
@@ -23,13 +22,14 @@ interface User {
   styleUrl: './login.component.scss'
 })
 export class LoginComponent implements User{
-    router : any;
     loginEmail: string = '';
     loginPassword: string = '';
     userName: string = '';
-    sessionStorage: Storage | undefined;
-    constructor(){
-      
+    localStorage: any;
+
+    constructor(private router: Router,@Inject(DOCUMENT) private document: Document){
+      this.localStorage = document.defaultView?.localStorage;
+
     }
 
 
@@ -43,7 +43,7 @@ export class LoginComponent implements User{
     if (userEmail === this.loginEmail && password === this.loginPassword) {
       // Credenciales válidas, redirige a la página de bienvenida
       alert('Usuario correcto')
-      this.router.navigate(["/bienvenida"]);
+      this.router.navigate(["bienvenida"]);
     } else {
       // Credenciales inválidas, muestra un mensaje de error o realiza otra acción
       alert('Nombre de usuario o contraseña incorrectos');
@@ -52,8 +52,8 @@ export class LoginComponent implements User{
 
   login(userEmail: string, password: string): void {
     console.log('Login');
-    // Recuperar usuarios del sessionStorage
-    const users: User[] = JSON.parse(localStorage.getItem('users') || '[]');
+    // Recuperar usuarios del localStorage
+    const users: User[] = JSON.parse(this.localStorage.getItem('users') || '[]');
     console.log("usuarios: "+ users.find(u => u.loginEmail === userEmail))
     // Buscar usuario por email y contraseña
     const user = users.find(u => u.loginEmail === userEmail && u.loginPassword === password);
@@ -75,8 +75,8 @@ export class LoginComponent implements User{
       { userName: 'Juan', loginEmail: 'juan@example.com', loginPassword: 'asdasd' },
       { userName: 'Pedro', loginEmail: 'pedro@example.com', loginPassword: 'qweqwe' }
     ];
-    localStorage.setItem('users', JSON.stringify(testUsers));
-    console.log('Usuarios de prueba añadidos al localStorage' + localStorage.getItem('users') || '[]');
+    this.localStorage.setItem('users', JSON.stringify(testUsers));
+    console.log('Usuarios de prueba añadidos al localStorage' + this.localStorage.getItem('users') || '[]');
   }
 
 }
